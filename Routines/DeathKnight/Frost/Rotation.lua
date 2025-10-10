@@ -404,11 +404,11 @@ local function enemyRotation()
                 and not variable.rune_pooling
                 and not ( A.Obliteration:GetTalentTraits() ~= 0
                 and player.aura(auras.PillarOfFrost) )
-                and MultiUnits:GetByRange(6) >=variable.frostscythe_prio
+                and MultiUnits:GetByRange(6) >= variable.frostscythe_prio
             then return A.Frostscythe:cast(target) end
 
 
-
+S
 --]]
 
 
@@ -416,7 +416,7 @@ local function enemyRotation()
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
             if spells.Obliterate:castable(target)
                 and not variable.rune_pooling
-                and not ( A.Obliteration:GetTalentTraits() ~= 0
+                and not ( talents.Obliteration:rank() ~= 0
                 and player.aura(auras.PillarOfFrost) )
             then return A.Obliterate:cast(target) end
 

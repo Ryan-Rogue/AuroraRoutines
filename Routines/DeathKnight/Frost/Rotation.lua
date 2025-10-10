@@ -1,3 +1,6 @@
+
+local Aurora = Aurora
+
 -- Get commonly used units
 local target = Aurora.UnitManager:Get("target")
 local player = Aurora.UnitManager:Get("player")
@@ -23,10 +26,14 @@ local function enemyRotation()
     local inMelee = player.distancetoliteral(target) <= 6
     local tierSet = Aurora.hasequipped({237628, 237626, 237631, 237627, 237629})
 
+
+    local enemiesAround = player.enemiesaround(5)
+
+
     --todo global player.enemiesaround(5) sucks and isnt accurate
 
     --variable.st_planning
-    if player.enemiesaround(5) == 1
+    if enemiesAround == 1
             --and ( not raid_event.adds.exists
             --or not raid_event.adds.in
             --or raid_event.adds.in>15)
@@ -34,7 +41,7 @@ local function enemyRotation()
         else variable.st_planning = false
     end
 
-    variable.adds_remain = player.enemiesaround(5) >=2
+    variable.adds_remain = enemiesAround >=2
             and (target.ttd > 5 
                 -- or GetToggle(2, "TTDSlider") < 5
                 )
@@ -59,7 +66,7 @@ local function enemyRotation()
         and variable.sending_cds
         and isBurst
 
-    variable.frostscythe_prio = 3 + (1* Aurora.bin( talents.RidersChampion:isknown() and tierSet >= 4 and not ( talents.CleavingStrikes:isknown() and player.aura(auras.RemorselessWinter))))
+    variable.frostscythe_prio = 3 + (1 * Aurora.bin( talents.RidersChampion:isknown() and tierSet >= 4 and not ( talents.CleavingStrikes:isknown() and player.aura(auras.RemorselessWinter))))
 
     variable.breath_of_sindragosa_check=
         spells.BreathOfSindragosa:isknown()
@@ -82,7 +89,7 @@ local function enemyRotation()
         if A.RemorselessWinter:IsReady(player, true)
             and inMelee
             and A.FrozenDominion:GetTalentTraits() == 0
-            and (variable.sending_cds and ( MultiUnits:GetByRange(6) >1 or A.GatheringStorm:GetTalentTraits() ~= 0 )
+            and (variable.sending_cds and ( enemiesAround >1 or A.GatheringStorm:GetTalentTraits() ~= 0 )
                 or ( Player:HasAuraStacksBySpellID(A.GatheringStorm.ID) == 10 and Player:HasAuraBySpellID(A.RemorselessWinter.ID) < GetGCD() ) and Ryan.fight_remains(unitID) >10) -- TODO why is this backwards
         then return A.RemorselessWinter:cast(target) end
         if A.FrostwyrmsFury:IsReady(player)
@@ -167,10 +174,10 @@ local function enemyRotation()
             and inMelee
             and IsCooldownWorthy(unitID)
             and ( A.ApocalypseNow:GetTalentTraits() == 0
-            and MultiUnits:GetByRange(6) == 1
+            and enemiesAround == 1
             and ( A.PillarOfFrost:GetTalentTraits() ~= 0
             and Player:HasAuraBySpellID(A.PillarOfFrost.ID) ~= 0
-            and A.Obliteration:GetTalentTraits() == 0
+            and talents.Obliteration:rank() == 0
                     or A.PillarOfFrost:GetTalentTraits() == 0 )
             --and ( not raid_event.adds.exists or raid_event.adds.in>cooldown.frostwyrms_fury.duration+raid_event.adds.duration)
             and variable.fwf_buffs
@@ -181,7 +188,7 @@ local function enemyRotation()
             and inMelee
             and IsCooldownWorthy(unitID)
             and A.ApocalypseNow:GetTalentTraits() == 0
-            and MultiUnits:GetByRange(6) >=2
+            and enemiesAround >=2
             and ( A.PillarOfFrost:GetTalentTraits() ~= 0
             and Player:HasAuraBySpellID(A.PillarOfFrost.ID) ~= 0
             --or raid_event.adds.exists and raid_event.adds.up and raid_event.adds.in< A.PillarOfFrost:GetCooldown() - raid_event.adds.in-raid_event.adds.duration
@@ -193,7 +200,7 @@ local function enemyRotation()
             and inMelee
             and IsCooldownWorthy(unitID)
             and A.ApocalypseNow:GetTalentTraits() == 0
-            and A.Obliteration:GetTalentTraits() ~= 0
+            and talents.Obliteration:rank() ~= 0
             and ( A.PillarOfFrost:GetTalentTraits() ~= 0
             and Player:HasAuraBySpellID(A.PillarOfFrost.ID) ~= 0
             and not  main_hand_2h
@@ -205,28 +212,15 @@ local function enemyRotation()
             --and ( not raid_event.adds.exists or raid_event.adds.in>cooldown.frostwyrms_fury.duration+raid_event.adds.duration)
         then return A.FrostwyrmsFury:cast(target) end
 
-        
-
-
-
-
-
-
-
         --]]
 
         if isBurst and inMelee and spells.RaiseDead:cast(player) then return true end 
         
-        
-
-        --[[   
-        if A.SoulReaper:IsReady(unitID)
-            and A.ReaperOfSouls:GetTalentTraits() ~= 0
-            and Player:HasAuraBySpellID(A.ReaperOfSouls.ID) ~= 0
-            and player.auracount(auras.KillingMachine) < 2 and player.aura(auras.KillingMachine)
-        then return A.SoulReaper:cast(target) end
-        --]]
-
+        if spells.SoulReaper:castable(target)
+            and talents.ReaperOfSouls:isknown()
+            and player.aura(auras.ReaperOfSouls)
+            and player.auracount(auras.KillingMachine) < 2
+        then return spells.SoulReaper:cast(target) end
 
         if  inMelee
             --and not ERWisFlying
@@ -314,32 +308,37 @@ local function enemyRotation()
     local function AoE()
 
 
-
-
-
-            --[[
-                if A.Frostscythe:IsReady(unitID, true)
+            if spells.Frostscythe:castable(target)
                 and inMelee
-                and ( Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) == 2
-                    or ( Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) ~= 0 and rune>=3))
-                and MultiUnits:GetByRange(6) >= variable.frostscythe_prio
-            then return A.Frostscythe:cast(target) end
+                and ( player.auracount(auras.KillingMachine) == 2
+                    or ( player.aura(auras.KillingMachine) and player.runes >= 3))
+                and enemiesAround >= variable.frostscythe_prio
+            then return spells.Frostscythe:cast(target) end
+
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
-            if A.Obliterate:IsReady(unitID)
-                and (Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) == 2
-                or ( Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) ~= 0 and rune>= 3))
-            then return A.Obliterate:cast(target) end
-            if A.HowlingBlast:IsReady(unitID) and inMelee
-                and (Player:HasAuraStacksBySpellID(A.Rime.ID) ~= 0
-                and A.FrostboundWill:GetTalentTraits() ~= 0
-                or Unit(unitID):HasDeBuffs(A.FrostFever.ID, true) == 0)
-            then return A.HowlingBlast:cast(target) end
-            if frostStrikeOrBane:IsReady(unitID) --this is to swap target early
+            if spells.Obliterate:castable(target)
+                and (player.auracount(auras.KillingMachine) == 2
+                or ( player.aura(auras.KillingMachine) and player.runes>= 3))
+            then return spells.Obliterate:cast(target) end
+
+            if spells.HowlingBlast:castable(target) 
+                and inMelee
+                and (player.aura(auras.Rime)
+                and talents.FrostboundWill:isknown()
+                or not target.aura(auras.FrostFever, player))
+            then return spells.HowlingBlast:cast(target) end
+
+
+            if spells.FrostStrike:castable(target) --this is to swap target early
                 --APL
-                and Player:HasAuraStacksBySpellID(A.FrostbaneBuff.ID) ~= 0
+                and player.aura(auras.Frostbane)
             then
                 --Target Logic
-                if Unit(unitID):HasDeBuffsStacks(A.Razorice.ID, true) == 5 then return A.FrostStrike:cast(target) end
+                if target.auracount(auras.Razorice, player) == 5 
+                then return spells.FrostStrike:cast(target) end
+            end   
+            
+                --[[
                 --Nameplate Logic
                 if inAoE
                     and not Ryan.AutoTargetExclusions(npcID) -- Target is something we swap off
@@ -357,17 +356,22 @@ local function enemyRotation()
                         end
                     end
                 end
-            end
-            if frostStrikeOrBane:IsReady(unitID) --this is to swap target early
+                --]]
+
+
+
+            if spells.FrostStrike:castable(target) --this is to swap target early
                 --APL
                 and A.ShatteringBlade:GetTalentTraits() ~= 0
-                and MultiUnits:GetByRange(6) < 5
+                and enemiesAround < 5
                 and not variable.rp_pooling
-                and A.Frostbane:GetTalentTraits() == 0
-            then
-                --Target Logic
-                if Unit(unitID):HasDeBuffsStacks(A.Razorice.ID, true) == 5
-                then return A.FrostStrike:cast(target) end
+                and talents.Frostbane:rank() == 0
+                and target.auracount(auras.Razorice, player) == 5
+            then return spells.FrostStrike:cast(target) end
+               
+            
+            
+            --[[
                 --Nameplate Logic
                 if inAoE
                     and not Ryan.AutoTargetExclusions(npcID) -- Target is something we swap off
@@ -385,65 +389,68 @@ local function enemyRotation()
                         end
                     end
                 end
-            end
-            if A.Frostscythe:IsReady(unitID, true) and inMelee
-                and Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) ~= 0
+                --]]
+
+
+
+
+
+
+
+
+            if spells.Frostscythe:castable(target) 
+                and inMelee
+                and player.aura(auras.KillingMachine)
                 and not variable.rune_pooling
-                and MultiUnits:GetByRange(6) >=variable.frostscythe_prio
+                and enemiesAround >=variable.frostscythe_prio
             then return A.Frostscythe:cast(target) end
+
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
-            if A.Obliterate:IsReady(unitID)
-                and Player:HasAuraStacksBySpellID(A.KillingMachineBuff.ID) ~= 0
+            if spells.Obliterate:castable(target)
+                and player.aura(auras.KillingMachine)
                 and not variable.rune_pooling
-            then return A.Obliterate:cast(target) end
-            if A.HowlingBlast:IsReady(unitID) and inMelee and Player:HasAuraStacksBySpellID(A.Rime.ID) ~= 0 then return A.HowlingBlast:cast(target) end
-            if A.GlacialAdvance:IsReady(unitID, true) and inMelee
+            then return spells.Obliterate:cast(target) end
+
+            if spells.HowlingBlast:castable(target) 
+                and inMelee 
+                and player.aura(auras.Rime)
+            then return spells.HowlingBlast:cast(target) end
+
+            if spells.GlacialAdvance:castable(target) and inMelee
                 and not variable.rp_pooling
-            then return A.GlacialAdvance:cast(target) end
-            if A.Frostscythe:IsReady(unitID, true) and inMelee
+            then return spells.GlacialAdvance:cast(target) end
+
+            if spells.Frostscythe:castable(target) 
+                and inMelee --Todo check other shit like los and facing?
+                -- APL
                 and not variable.rune_pooling
-                and not ( A.Obliteration:GetTalentTraits() ~= 0
-                and player.aura(auras.PillarOfFrost) )
-                and MultiUnits:GetByRange(6) >= variable.frostscythe_prio
-            then return A.Frostscythe:cast(target) end
-
-
-S
---]]
-
-
+                and not ( talents.Obliteration:rank() ~= 0 and player.aura(auras.PillarOfFrost) )
+                and enemiesAround >= variable.frostscythe_prio
+            then return spells.Frostscythe:cast(target) end
 
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
             if spells.Obliterate:castable(target)
                 and not variable.rune_pooling
                 and not ( talents.Obliteration:rank() ~= 0
                 and player.aura(auras.PillarOfFrost) )
-            then return A.Obliterate:cast(target) end
+            then return spells.Obliterate:cast(target) end
 
-
-
-
-
-
-
-        if spells.HowlingBlast:castable(target) 
-            and inMelee 
-            and not player.aura(auras.KillingMachine)
-            and talents.Obliteration:rank() ~= 0 and player.aura(auras.PillarOfFrost)
+            if spells.HowlingBlast:castable(target) 
+                and inMelee 
+                and not player.aura(auras.KillingMachine)
+                and talents.Obliteration:rank() ~= 0 and player.aura(auras.PillarOfFrost)
             then return spells.HowlingBlast:cast(target) end
 
-            
-
-        --In combat ranged GCD filler
-        if  player.combat --added to prevent OOC pulling
-            and player.runes >= 5
-            and target.healthpercent < 100
-            and not inMelee -- don't fuck with other logic in melee
-            and spells.HowlingBlast:cast(target)
-        then return true end
+            --In combat ranged GCD filler
+            if  player.combat --added to prevent OOC pulling
+                and player.runes >= 5
+                and target.healthpercent < 100
+                and not inMelee -- don't fuck with other logic in melee
+                and spells.HowlingBlast:cast(target)
+            then return true end
 
 
-        return true
+            return true
 
 
     end

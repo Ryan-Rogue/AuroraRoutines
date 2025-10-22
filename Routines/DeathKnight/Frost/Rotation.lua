@@ -86,12 +86,17 @@ local function enemyRotation()
         --[[
         --local Potions = Ryan.Potions()
         --if Potions and Potions:cast(target) then return true end --use Potions
-        if A.RemorselessWinter:IsReady(player, true)
+
+        if spells.RemorselessWinter:castable(player)
             and inMelee
-            and A.FrozenDominion:GetTalentTraits() == 0
-            and (variable.sending_cds and ( enemiesAround >1 or A.GatheringStorm:GetTalentTraits() ~= 0 )
-                or ( Player:HasAuraStacksBySpellID(A.GatheringStorm.ID) == 10 and Player:HasAuraBySpellID(A.RemorselessWinter.ID) < GetGCD() ) and Ryan.fight_remains(unitID) >10) -- TODO why is this backwards
-        then return A.RemorselessWinter:cast(target) end
+            and not talents.FrozenDominion:isknown()
+            and (variable.sending_cds and ( enemiesAround >1 or talents.GatheringStorm:isknown())
+                or ( Player:HasAuraStacksBySpellID(A.GatheringStorm.ID) == 10 and Player:HasAuraBySpellID(A.RemorselessWinter.ID) < GetGCD() ) 
+                and Ryan.fight_remains(unitID) >10  -- TODO why is this backwards
+            )
+        then return spells.RemorselessWinter:cast(target) end
+        --]]
+        --[[
         if A.FrostwyrmsFury:IsReady(player)
             and inMelee
             and talents.RidersChampion:isknown()
@@ -124,11 +129,8 @@ local function enemyRotation()
             and (not spells.BreathOfSindragosa:isknown() and variable.sending_cds and ( not spells.ReapersMark:isknown() or rune>=2)
                 and target.ttd > 20 --pillarTTD --added ttd here
                 --or Ryan.fight_remains(unitID) <20
-            )
-            and spells.PillarOfFrost:cast(player)
-        then return true end
-
-
+            ) 
+        then return spells.PillarOfFrost:cast(player) end
         if  spells.PillarOfFrost:castable(player)
             --and IsCooldownWorthy(unitID)
             and isBurst
@@ -136,16 +138,7 @@ local function enemyRotation()
             and (spells.BreathOfSindragosa:isknown() and variable.sending_cds
             and ( spells.BreathOfSindragosa:getcd() > 20 or ( spells.BreathOfSindragosa:getcd() == 0 and player.runicpower >= (60-(20* spells.ReapersMark:rank()))))
             and ( not spells.ReapersMark:isknown() or player.runes>=2))
-            and spells.PillarOfFrost:cast(player)
-        then return true end
-
-
-
-
-            
-
-
-
+        then return spells.PillarOfFrost:cast(player) end
         if  spells.BreathOfSindragosa:castable(player) 
             and inMelee
             and isBurst

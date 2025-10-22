@@ -102,3 +102,5 @@ Aurora.SpellHandler.PopulateSpellbook({
         IcyOnslaught              = NewSpell(1230272),
     },
 }, "DEATHKNIGHT",2,"Ryan")
+
+

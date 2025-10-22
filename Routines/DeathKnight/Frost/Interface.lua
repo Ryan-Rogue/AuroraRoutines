@@ -23,6 +23,35 @@ Aurora.Rotation.Raid2 = Aurora:AddGlobalToggle({
 })
 
 
+local gui = Aurora.GuiBuilder:New()
+
+gui:Category("My Category")
+gui:Tab("General")
+gui:Header({ text = "Settings" })
+
+
+
+gui:Dropdown({
+    text = "Battle Potions",
+    key = "battlePotions",
+    options = {
+        { text = "Never", value = 0 },
+        { text = "M+", value = 1 },
+        { text = "Raid", value = 2 },
+        { text = "M+ and Raid", value = 3 },
+        { text = "Always", value = 4 },
+    },
+    default = 3,
+    multi = false,           -- Set to true for multi-select
+    --width = 200,            -- Optional
+    tooltip = "Where to use Potions\nAlso used with Sated debuff of 5 minutes",
+    onChange = function(self, value)
+        print("Battle Potion changed:", value)
+    end
+})
+
+
+
 
 
 

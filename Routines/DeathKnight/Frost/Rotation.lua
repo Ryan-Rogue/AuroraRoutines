@@ -86,12 +86,17 @@ local function enemyRotation()
         --[[
         --local Potions = Ryan.Potions()
         --if Potions and Potions:cast(target) then return true end --use Potions
-        if A.RemorselessWinter:IsReady(player, true)
+
+        if spells.RemorselessWinter:castable(player)
             and inMelee
-            and A.FrozenDominion:GetTalentTraits() == 0
-            and (variable.sending_cds and ( enemiesAround >1 or A.GatheringStorm:GetTalentTraits() ~= 0 )
-                or ( Player:HasAuraStacksBySpellID(A.GatheringStorm.ID) == 10 and Player:HasAuraBySpellID(A.RemorselessWinter.ID) < GetGCD() ) and Ryan.fight_remains(unitID) >10) -- TODO why is this backwards
-        then return A.RemorselessWinter:cast(target) end
+            and not talents.FrozenDominion:isknown()
+            and (variable.sending_cds and ( enemiesAround >1 or talents.GatheringStorm:isknown())
+                or ( Player:HasAuraStacksBySpellID(A.GatheringStorm.ID) == 10 and Player:HasAuraBySpellID(A.RemorselessWinter.ID) < GetGCD() ) 
+                and Ryan.fight_remains(unitID) >10  -- TODO why is this backwards
+            )
+        then return spells.RemorselessWinter:cast(target) end
+        --]]
+        --[[
         if A.FrostwyrmsFury:IsReady(player)
             and inMelee
             and talents.RidersChampion:isknown()
@@ -100,7 +105,7 @@ local function enemyRotation()
             and ( A.PillarOfFrost:GetCooldown() < GetGCD() and Unit(unitID):TimeToDie() > GetToggle(2, "TTDSlider") or Ryan.fight_remains(unitID) <20) -- added TTD here
             and A.BreathOfSindragosa:GetTalentTraits() == 0
         then return A.FrostwyrmsFury:cast(target) end
-        if A.FrostwyrmsFury:IsReady(player)
+        if spells.FrostwyrmsFury:castable(player)  
             and inMelee
             and talents.RidersChampion:isknown()
             and A.ApocalypseNow:GetTalentTraits() ~= 0
@@ -118,34 +123,24 @@ local function enemyRotation()
 
 
 
-        if             --and IsCooldownWorthy(unitID)
-             isBurst
-            and (not spells.BreathOfSindragosa:isknown() and variable.sending_cds and ( not spells.ReapersMark:isknown() or player.runes>=2)
+        if  spells.PillarOfFrost:castable(player)           
+            --and IsCooldownWorthy(unitID)
+            and isBurst
+            and (not spells.BreathOfSindragosa:isknown() and variable.sending_cds and ( not spells.ReapersMark:isknown() or rune>=2)
                 and target.ttd > 20 --pillarTTD --added ttd here
                 --or Ryan.fight_remains(unitID) <20
-            )
-            and spells.PillarOfFrost:cast(player)
-        then return true end
-
-
-        if             --and IsCooldownWorthy(unitID)
-             isBurst
+            ) 
+        then return spells.PillarOfFrost:cast(player) end
+        if  spells.PillarOfFrost:castable(player)
+            --and IsCooldownWorthy(unitID)
+            and isBurst
             and target.ttd > 20 --pillarTTD --added ttd here
-
             and (spells.BreathOfSindragosa:isknown() and variable.sending_cds
             and ( spells.BreathOfSindragosa:getcd() > 20 or ( spells.BreathOfSindragosa:getcd() == 0 and player.runicpower >= (60-(20* spells.ReapersMark:rank()))))
             and ( not spells.ReapersMark:isknown() or player.runes>=2))
-            and spells.PillarOfFrost:cast(player)
-        then return true end
-
-
-
-
-            
-
-
-
-        if  inMelee
+        then return spells.PillarOfFrost:cast(player) end
+        if  spells.BreathOfSindragosa:castable(player) 
+            and inMelee
             and isBurst
             and not player:aura(spells.BreathOfSindragosa.id)
             and ( player.aura(auras.PillarOfFrost) and target.ttd > 20 --added here
@@ -155,8 +150,9 @@ local function enemyRotation()
         then return true end
 
         --,target_if=first: Unit(unitID):HasDeBuffs(A.ReapersMarkDebuff.ID, true) == 0
-        if  --(not GetToggle(2, "targetFocus") or not Unit("focus"):IsExists() or UnitIsUnit("focus" , unitID) or Action.IsUnitFriendly("focus") ) -- only on focus if set
-            (isBurst or player.aura(auras.PillarOfFrost))
+        if spells.ReapersMark:castable(target) 
+            --and (not GetToggle(2, "targetFocus") or not Unit("focus"):IsExists() or UnitIsUnit("focus" , unitID) or Action.IsUnitFriendly("focus") ) -- only on focus if set
+            and (isBurst or player.aura(auras.PillarOfFrost))
             and (player.aura(auras.PillarOfFrost)
                 or spells.PillarOfFrost:getcd() > 5
                 --or Ryan.fight_remains(unitID) <20

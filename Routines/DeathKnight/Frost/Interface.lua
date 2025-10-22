@@ -1,5 +1,6 @@
 --local Tinkr, Aurora, project = ...
 
+local Aurora = Aurora
 
 Aurora.Rotation.BurstToggle = Aurora:AddGlobalToggle({
     label = "Defensives",              -- Display name (max 11 characters)

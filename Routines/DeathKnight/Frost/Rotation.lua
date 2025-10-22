@@ -120,7 +120,7 @@ local function enemyRotation()
 
         if             --and IsCooldownWorthy(unitID)
              isBurst
-            and (not spells.BreathOfSindragosa:isknown() and variable.sending_cds and ( not spells.ReapersMark:isknown() or rune>=2)
+            and (not spells.BreathOfSindragosa:isknown() and variable.sending_cds and ( not spells.ReapersMark:isknown() or player.runes>=2)
                 and target.ttd > 20 --pillarTTD --added ttd here
                 --or Ryan.fight_remains(unitID) <20
             )
@@ -308,12 +308,12 @@ local function enemyRotation()
     local function AoE()
 
 
-            if spells.Frostscythe:castable(target)
+            if spells.Frostscythe:castable(player)
                 and inMelee
                 and ( player.auracount(auras.KillingMachine) == 2
                     or ( player.aura(auras.KillingMachine) and player.runes >= 3))
                 and enemiesAround >= variable.frostscythe_prio
-            then return spells.Frostscythe:cast(target) end
+            then return spells.Frostscythe:cast(player) end
 
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
             if spells.Obliterate:castable(target)
@@ -362,7 +362,7 @@ local function enemyRotation()
 
             if spells.FrostStrike:castable(target) --this is to swap target early
                 --APL
-                and A.ShatteringBlade:GetTalentTraits() ~= 0
+                and talents.ShatteringBlade:isknown()
                 and enemiesAround < 5
                 and not variable.rp_pooling
                 and talents.Frostbane:rank() == 0
@@ -398,12 +398,12 @@ local function enemyRotation()
 
 
 
-            if spells.Frostscythe:castable(target) 
+            if spells.Frostscythe:castable(player) 
                 and inMelee
                 and player.aura(auras.KillingMachine)
                 and not variable.rune_pooling
                 and enemiesAround >=variable.frostscythe_prio
-            then return A.Frostscythe:cast(target) end
+            then return spells.Frostscythe:cast(player) end
 
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
             if spells.Obliterate:castable(target)
@@ -416,17 +416,18 @@ local function enemyRotation()
                 and player.aura(auras.Rime)
             then return spells.HowlingBlast:cast(target) end
 
-            if spells.GlacialAdvance:castable(target) and inMelee
+            if spells.GlacialAdvance:castable(player) 
+                and inMelee
                 and not variable.rp_pooling
-            then return spells.GlacialAdvance:cast(target) end
+            then return spells.GlacialAdvance:cast(player) end
 
-            if spells.Frostscythe:castable(target) 
+            if spells.Frostscythe:castable(player) 
                 and inMelee --Todo check other shit like los and facing?
                 -- APL
                 and not variable.rune_pooling
                 and not ( talents.Obliteration:rank() ~= 0 and player.aura(auras.PillarOfFrost) )
                 and enemiesAround >= variable.frostscythe_prio
-            then return spells.Frostscythe:cast(target) end
+            then return spells.Frostscythe:cast(player) end
 
             --,target_if=max:( A.RidersChampion:GetTalentTraits() ~= 0 and Unit(unitID):HasDeBuffsStacks(A.ChainsOfIceTrollbaneSlow.ID, true) ~= 0) -- This isn't real, the debuff applies to them all and breaks all at the same time, also no stacks
             if spells.Obliterate:castable(target)
@@ -442,12 +443,12 @@ local function enemyRotation()
             then return spells.HowlingBlast:cast(target) end
 
             --In combat ranged GCD filler
-            if  player.combat --added to prevent OOC pulling
+            if spells.HowlingBlast:castable(target) 
+                and player.combat --added to prevent OOC pulling
                 and player.runes >= 5
                 and target.healthpercent < 100
                 and not inMelee -- don't fuck with other logic in melee
-                and spells.HowlingBlast:cast(target)
-            then return true end
+            then return spells.HowlingBlast:cast(target) end
 
 
             return true
@@ -485,6 +486,11 @@ Aurora:RegisterRoutine(function()
 
     -- Skip if player is dead or eating/drinking
     if player.dead or player.aura("Food") or player.aura("Drink") then return end
+
+
+    --if spells.GlacialAdvance:castable(player)  then  spells.GlacialAdvance:cast(player)  return end
+    --if spells.Frostscythe:castable(player)  then  spells.Frostscythe:cast(player)  return end
+    --if true then return end
 
     -- Run appropriate function based on combat state
     if not player.combat then Ooc() end

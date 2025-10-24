@@ -111,6 +111,49 @@ gui:Checkbox({
 
 
 
+gui:Tab("Targeting")
+gui:Header({ text = "Auto Targeting (In Priority Order)" })
+gui:Dropdown({
+    text = "Raid Marker",
+    key = "targeting.raidMarkers",
+    options = {
+        { text = "Off", value = 0 },
+        { text = "Star", value = 1 },
+        { text = "Circle", value = 2 },
+        { text = "Diamond", value = 3 },
+        { text = "Triangle", value = 4 },
+        { text = "Moon", value = 5 },
+        { text = "Square", value = 6 },
+        { text = "Cross", value = 7 },
+        { text = "Skull", value = 8 },
+    },
+    default = 0,
+    multi = false,           -- Set to true for multi-select
+    --width = 200,            -- Optional
+    tooltip = "Auto target Raid Marker set in Dropdown",
+})
+gui:spacer()
+gui:Checkbox({
+    text = "Focus",
+    key = "targeting.focus",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Auto target Focus", -- Optional tooltip
+})
+gui:spacer()
+gui:Checkbox({
+    text = "Priority NPCs",
+    key = "targeting.priorityNPCs",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Auto target my custom list of Prio targets", -- Optional tooltip
+})
+gui:spacer()
+gui:Checkbox({
+    text = "Hunters Mark",
+    key = "targeting.huntersMark",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Auto target Hunter\'s Mark above 80% health", -- Optional tooltip
+})
+
 
 local Draw = Aurora.Draw
 

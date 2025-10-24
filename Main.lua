@@ -53,7 +53,7 @@ local burntOut = { -- debuff after lust
 
 
 
-
+--[[
 function Ryan.Potions()
     local toggle = GetToggle(2, "BattlePot") or 0
     if toggle == 0 then return false end
@@ -71,7 +71,7 @@ function Ryan.Potions()
     if toggle == 4 then return battlePotion end  --on CD
 end
 
-
+--]]
 
 
 

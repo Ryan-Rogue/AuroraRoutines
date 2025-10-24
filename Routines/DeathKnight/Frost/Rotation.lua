@@ -15,6 +15,16 @@ local variable = {}
 
 
 
+spells.AutoAttack:callback(function(spell, logic)
+    -- Your spell logic here
+    
+    if spells.AutoAttack:castable(target) and target.enemy and spells.RuneStrike:inrange(target) then
+        print("auto attacking")
+        return spell:cast(target)
+    end
+end)
+
+
 
 
 
@@ -451,6 +461,8 @@ local function enemyRotation()
 
 
     end
+
+    spells.AutoAttack:execute()
     --if Trinkets() then return true end
     if Cooldowns() then return true end
     --if Racial() then return true end
@@ -481,8 +493,7 @@ end
 Aurora:RegisterRoutine(function()
 
     -- Skip if player is dead or eating/drinking
-    if player.dead or player.aura("Food") or player.aura("Drink") then return end
-
+    if player.dead or player.aura("Food") or player.aura("Drink") or player.mounted then return end
 
     --if spells.GlacialAdvance:castable(player)  then  spells.GlacialAdvance:cast(player)  return end
     --if spells.Frostscythe:castable(player)  then  spells.Frostscythe:cast(player)  return end

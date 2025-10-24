@@ -24,13 +24,9 @@ Aurora.Rotation.Raid2 = Aurora:AddGlobalToggle({
 
 
 local gui = Aurora.GuiBuilder:New()
-
-gui:Category("My Category")
+gui:Category("Ryan\'s Settings")
 gui:Tab("General")
 gui:Header({ text = "Settings" })
-
-
-
 gui:Dropdown({
     text = "Battle Potions",
     key = "battlePotions",
@@ -46,7 +42,67 @@ gui:Dropdown({
     --width = 200,            -- Optional
     tooltip = "Where to use Potions\nAlso used with Sated debuff of 5 minutes",
     onChange = function(self, value)
-        print("Battle Potion changed:", value)
+        print("Battle Potion changed:", self.options[value+1].text)
+    end
+})
+
+gui:Tab("Frost Settings")
+gui:Header({ text = "Battle Rez In Raid" })
+gui:Checkbox({
+    text = "Tanks",
+    key = "feature.enabled",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
+    end
+})
+
+gui:Checkbox({
+    text = "Healers",
+    key = "feature.enabled2",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
+    end
+})
+gui:Checkbox({
+    text = "DPS",
+    key = "feature.enabled5",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
+    end
+})
+gui:Header({ text = "Battle Rez In M+" })
+gui:Checkbox({
+    text = "Tanks",
+    key = "feature.enabled3",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
+    end
+})
+
+gui:Checkbox({
+    text = "Healers",
+    key = "feature.enabled4",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
+    end
+})
+gui:Checkbox({
+    text = "DPS",
+    key = "feature.enabled5",  -- Config key for saving
+    default = false,          -- Default value
+    tooltip = "Enable this feature to do something cool", -- Optional tooltip
+    onChange = function(self, checked)
+        print("Checkbox changed:", checked)
     end
 })
 

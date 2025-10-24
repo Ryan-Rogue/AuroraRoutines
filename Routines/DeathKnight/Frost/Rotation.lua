@@ -1,6 +1,6 @@
 
 local Aurora = Aurora
-
+local BossMods = Aurora.BossMod
 -- Get commonly used units
 local target = Aurora.UnitManager:Get("target")
 local player = Aurora.UnitManager:Get("player")
@@ -142,7 +142,7 @@ local function enemyRotation()
         if  spells.BreathOfSindragosa:castable(player) 
             and inMelee
             and isBurst
-            and not player:aura(spells.BreathOfSindragosa.id)
+            and not player.aura(spells.BreathOfSindragosa.id)
             and ( player.aura(auras.PillarOfFrost) and target.ttd > 20 --added here
                     --or Ryan.fight_remains(unitID) <20
                 )
@@ -466,6 +466,42 @@ end
 local function Ooc()
     -- Add your out of combat logic here
 
+        local function PreCombatRaidTimers()
+            if not Ryan.IsInARaid() then return false end --don't use timers outside raid
+            if not Ryan.preCombatChecks() then return false end
+
+            local pullTimerTime = BossMods:getpulltimeremaining()
+            local GetPullTimer = math.max(pullTimerTime, Ryan.WoWPullTimer()) - GetTime() + A.GetPing() --amount of time until the current pull timer ends from either boss mods or blizzard
+
+            --Pull timer has just expired! Open with Stealth(), PreCombatApproach() will skip due to being in melee range
+            if GetPullTimer <= 0.050 and GetPullTimer >= -0.300 then return false end
+            --This is the line that stops the rotation for pull timers
+            if GetPullTimer <= -0.300 or GetPullTimer > 0 then return true end --Pull timer has not been sent yet or is in progress
+        end
+
+        local function MythicPlusDomeActions()
+            if not Ryan.IsInADungeon() then return false end --don't use timers outside of m+
+            if not Ryan.preCombatChecks() then return false end --checks to make sure we should wait for timers
+            if Player:HasAuraBySpellID(A.ShroudOfConcealment.ID, true) ~= 0 then return false end
+            local GetPullTimer = Ryan.DungeonTimer() - GetTime() --amount of time until the current pull timer ends from blizzard in m+ dome, 0 is key start
+            if GetPullTimer < -10 then return false end --Nothing happens after the first 10 seconds of M+ dungeon here
+
+        end
+        local function MythicPlusBossRP()
+            if not Ryan.IsInAInstance() then return false end --We will do this in any raid or dungeon, should be good enough
+            local warmupTimer = BossMods:GetTimer("Active")
+            if warmupTimer == 0 or warmupTimer == -1 then return false end --No timer, quit
+
+        end
+
+        if PreCombatRaidTimers() then return true end --pre-combat Raid actions based on player sent pull timer
+        if MythicPlusPreKey() then return true end --pre-combat M0 actions based on player sent pull timer
+        if MythicPlusDomeActions() then return true end --pre-combat M+ actions based on Dome Timer
+        if MythicPlusBossRP() then return true end --pre-combat M+ actions based on Big/LittleWigs Active Timers
+
+
+
+
 
 end
 
@@ -480,16 +516,17 @@ end
 -- Register the rotation
 Aurora:RegisterRoutine(function()
 
-    -- Skip if player is dead or eating/drinking
-    if player.dead or player.aura("Food") or player.aura("Drink") then return end
 
+    if player.dead or player.aura("Food") or player.aura("Drink") or player.invehicle then return end
 
-    --if spells.GlacialAdvance:castable(player)  then  spells.GlacialAdvance:cast(player)  return end
-    --if spells.Frostscythe:castable(player)  then  spells.Frostscythe:cast(player)  return end
-    --if true then return end
 
     -- Run appropriate function based on combat state
     if not player.combat then Ooc() end
+    --Ryan.AutoTarget(spells.RuneStrike)
     if target.exists then enemyRotation() end
     
+
+
+
+
 end, "DEATHKNIGHT", 2, "Ryan")

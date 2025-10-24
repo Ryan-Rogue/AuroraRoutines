@@ -64,6 +64,7 @@ Aurora.SpellHandler.PopulateSpellbook({
         ReapersMark             = 434765,
         RemorselessWinter       = 196770,
         FrostFever              = 55095,
+
     },
     talents = {
         --Add Talents here

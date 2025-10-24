@@ -311,7 +311,6 @@ function Ryan.AutoTarget(spell)
     -- TODO if OOCAutoMouseOverFocus(icon) then return true end -- mouseover set focus checks first (i consider focus as part of auto targeting)
     -- TODO if GetToggle(2, "MOTotem") and Unit(target):IsEnemy() and Unit(target):IsTotem() then return false end
     -- TODO, deconflict with Aurora AutoTargeting if GetToggle(1, "AutoTarget") then Action.SetToggle({1, "AutoTarget"}, false) end
-    if player.aura(auras.ShroudOfConcealment) then return false end
     if not player.combat then return false end
 
     -- --- Conditions for WHEN to not look for a new target ---

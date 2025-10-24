@@ -518,6 +518,7 @@ Aurora:RegisterRoutine(function()
 
 
     if player.dead or player.aura("Food") or player.aura("Drink") or player.invehicle then return end
+    if player.aura(auras.ShroudOfConcealment) then return false end
 
 
     -- Run appropriate function based on combat state
